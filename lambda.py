@@ -15,27 +15,41 @@ from ask_sdk_core.handler_input import HandlerInput
 
 from ask_sdk_model import Response
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)
 
-auth_token = ""
-hostname = "https://app.api.surehub.io"
-household = ""
+# Customisable bits
+AUTH_TOKEN = ""
+HOUSEHOLD = ""
 
-def getCatLocation():
+API_URL = f"https://app.api.surehub.io/api/pet/{HOUSEHOLD}/position"
+
+def getCatLocation() -> str:
     location = ""
-    url = "https://app.api.surehub.io/api/pet/{}/position".format(household)
-    response = requests.get(url, headers={"Authorization": "Bearer {}".format(token)})
+    LOGGER.debug("Making request to API URL %s", API_URL)
+
+    response = requests.get(
+        API_URL,
+        headers={"Authorization": f"Bearer {AUTH_TOKEN}"})
+
+    if not response.ok:
+        message = response.content.decode('utf-8')
+
+        raise RuntimeError(
+            f"Failed to GET pet location: {response.status_code}: {message}"
+        )
+
     json_data = response.json()
+
+    LOGGER.debug("JSON Response: %s", json_data)
+
     if json_data['data']:
         if json_data['data']['where'] == 1:
-            location = "inside"
-        else:
-            location = "outside"
-        return location
+            return "inside"
+        
+        return "outside"
 
-
-
+    return "unknown"
 
 
 class LaunchRequestHandler(AbstractRequestHandler):
@@ -181,7 +195,7 @@ class CatchAllExceptionHandler(AbstractExceptionHandler):
 
     def handle(self, handler_input, exception):
         # type: (HandlerInput, Exception) -> Response
-        logger.error(exception, exc_info=True)
+        LOGGER.error(exception, exc_info=True)
 
         speak_output = "Sorry, I had trouble doing what you asked. Please try again."
 
