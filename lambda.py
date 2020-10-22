@@ -21,6 +21,7 @@ LOGGER.setLevel(logging.INFO)
 # Customisable bits
 AUTH_TOKEN = ""
 HOUSEHOLD = ""
+PET_NAME = "Moo"
 
 API_URL = f"https://app.api.surehub.io/api/pet/{HOUSEHOLD}/position"
 
@@ -49,7 +50,7 @@ def getCatLocation() -> str:
         
         return "outside"
 
-    return "unknown"
+    return "in a different dimension"
 
 
 class LaunchRequestHandler(AbstractRequestHandler):
@@ -81,7 +82,7 @@ class GetLocationOfCatIntentHandler(AbstractRequestHandler):
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
         location = getCatLocation()
-        speak_output = "Moo is currently "+location
+        speak_output = f"{PET_NAME} is currently {location}"
 
         return (
             handler_input.response_builder
@@ -98,7 +99,7 @@ class SetLocationOfCatIntentHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        speak_output = "Ok, setting moos location to moon"
+        speak_output = f"Ok, setting {PET_NAME}'s location to moon"
 
         return (
             handler_input.response_builder
