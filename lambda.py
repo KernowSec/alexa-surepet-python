@@ -26,7 +26,7 @@ pet_id = ""
 def getCatLocation():
     location = ""
     url = "https://app.api.surehub.io/api/pet/{}/position".format(pet_id)
-    response = requests.get(url, headers={"Authorization": "Bearer {}".format(token)})
+    response = requests.get(url, headers={"Authorization": "Bearer {}".format(auth_token)})
     json_data = response.json()
     if json_data['data']:
         if json_data['data']['where'] == 1:
