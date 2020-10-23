@@ -18,15 +18,21 @@ from ask_sdk_model import Response
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
 
+
+
 # Customisable bits
 AUTH_TOKEN = ""
 HOUSEHOLD = ""
 PET_NAME = "Moo"
+PET_ID = ""
 
-API_URL = f"https://app.api.surehub.io/api/pet/{HOUSEHOLD}/position"
+
+API_URL = f"https://app.api.surehub.io/api/pet/{PET_ID}/position"
 
 def getCatLocation() -> str:
     location = ""
+
+   
     LOGGER.debug("Making request to API URL %s", API_URL)
 
     response = requests.get(
@@ -39,6 +45,7 @@ def getCatLocation() -> str:
         raise RuntimeError(
             f"Failed to GET pet location: {response.status_code}: {message}"
         )
+
 
     json_data = response.json()
 
