@@ -15,28 +15,49 @@ from ask_sdk_core.handler_input import HandlerInput
 
 from ask_sdk_model import Response
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)
 
-auth_token = ""
-hostname = "https://app.api.surehub.io"
-household = ""
-pet_id = ""
 
-def getCatLocation():
+
+# Customisable bits
+AUTH_TOKEN = ""
+HOUSEHOLD = ""
+PET_NAME = "Moo"
+PET_ID = ""
+
+
+API_URL = f"https://app.api.surehub.io/api/pet/{PET_ID}/position"
+
+def getCatLocation() -> str:
     location = ""
-    url = "https://app.api.surehub.io/api/pet/{}/position".format(pet_id)
-    response = requests.get(url, headers={"Authorization": "Bearer {}".format(auth_token)})
+
+   
+    LOGGER.debug("Making request to API URL %s", API_URL)
+
+    response = requests.get(
+        API_URL,
+        headers={"Authorization": f"Bearer {AUTH_TOKEN}"})
+
+    if not response.ok:
+        message = response.content.decode('utf-8')
+
+        raise RuntimeError(
+            f"Failed to GET pet location: {response.status_code}: {message}"
+        )
+
+
     json_data = response.json()
+
+    LOGGER.debug("JSON Response: %s", json_data)
+
     if json_data['data']:
         if json_data['data']['where'] == 1:
-            location = "inside"
-        else:
-            location = "outside"
-        return location
+            return "inside"
+        
+        return "outside"
 
-
-
+    return "in a different dimension"
 
 
 class LaunchRequestHandler(AbstractRequestHandler):
@@ -68,7 +89,7 @@ class GetLocationOfCatIntentHandler(AbstractRequestHandler):
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
         location = getCatLocation()
-        speak_output = "Moo is currently "+location
+        speak_output = f"{PET_NAME} is currently {location}"
 
         return (
             handler_input.response_builder
@@ -85,7 +106,7 @@ class SetLocationOfCatIntentHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        speak_output = "Ok, setting moos location to moon"
+        speak_output = f"Ok, setting {PET_NAME}'s location to moon"
 
         return (
             handler_input.response_builder
@@ -182,7 +203,7 @@ class CatchAllExceptionHandler(AbstractExceptionHandler):
 
     def handle(self, handler_input, exception):
         # type: (HandlerInput, Exception) -> Response
-        logger.error(exception, exc_info=True)
+        LOGGER.error(exception, exc_info=True)
 
         speak_output = "Sorry, I had trouble doing what you asked. Please try again."
 
