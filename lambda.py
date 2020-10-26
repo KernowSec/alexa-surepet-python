@@ -7,6 +7,8 @@
 import logging
 import ask_sdk_core.utils as ask_utils
 import requests
+import datetime
+import json
 
 from ask_sdk_core.skill_builder import SkillBuilder
 from ask_sdk_core.dispatch_components import AbstractRequestHandler
@@ -21,10 +23,13 @@ LOGGER.setLevel(logging.INFO)
 
 
 # Customisable bits
+
+PET_NAME = ""
+PET_ID = ""
 AUTH_TOKEN = ""
 HOUSEHOLD = ""
-PET_NAME = "Moo"
-PET_ID = ""
+
+
 
 
 API_URL = f"https://app.api.surehub.io/api/pet/{PET_ID}/position"
@@ -32,7 +37,6 @@ API_URL = f"https://app.api.surehub.io/api/pet/{PET_ID}/position"
 def getCatLocation() -> str:
     location = ""
 
-   
     LOGGER.debug("Making request to API URL %s", API_URL)
 
     response = requests.get(
@@ -58,6 +62,37 @@ def getCatLocation() -> str:
         return "outside"
 
     return "in a different dimension"
+
+
+def setCatLocation(cats_location):
+    
+    now = datetime.datetime.now()
+    year = now.year
+    month = now.month
+    day = now.day
+    hour = now.hour
+    minute = now.minute
+    second = now.second
+
+    since_datetime = "{}-{}-{}T{}:{}:{}+00:00".format(year, month, day, hour, minute, second)
+
+    url = "https://app.api.surehub.io/api/pet/{}/position".format(PET_ID)
+    if cats_location == "inside" or cats_location == "home" or cats_location == "in":
+        location_code = 1
+    if cats_location == "outside" or cats_location == "out":
+        location_code = 2
+
+    body = {'where': location_code, 'since': since_datetime}
+
+    resp = requests.post(url, headers={"Authorization": "Bearer {}".format(AUTH_TOKEN), "Content-Type": "application/json"}, data=json.dumps(body))
+
+    json_data = resp.json()
+    if json_data['data']['where'] == location_code:
+        worked = True
+    else:
+        worked = False
+    return worked
+
 
 
 class LaunchRequestHandler(AbstractRequestHandler):
@@ -106,7 +141,14 @@ class SetLocationOfCatIntentHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        speak_output = f"Ok, setting {PET_NAME}'s location to moon"
+        
+        slot = ask_utils.request_util.get_slot(handler_input, "inout")
+        location = slot.value
+        
+        if setCatLocation(location):
+            speak_output = f"Ok, setting {PET_NAME}'s location to {location}"
+        else:
+            speak_output = "Something has gone wrong"
 
         return (
             handler_input.response_builder
