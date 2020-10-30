@@ -30,8 +30,6 @@ AUTH_TOKEN = ""
 HOUSEHOLD = ""
 
 
-
-
 API_URL = f"https://app.api.surehub.io/api/pet/{PET_ID}/position"
 
 def getCatLocation() -> str:
