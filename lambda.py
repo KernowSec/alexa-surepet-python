@@ -69,7 +69,11 @@ def getCatLocation() -> str:
 
 
 def setCatLocation(cats_location):
-    
+    """Function to set the cats location,
+        takes his location from the voice input of alexa from the slot value,
+            and sends it to teh api for updating the state. 1 = inside, 0 = outside.
+            """
+
     now = datetime.datetime.now()
     year = now.year
     month = now.month
@@ -152,7 +156,7 @@ class SetLocationOfCatIntentHandler(AbstractRequestHandler):
         if setCatLocation(location):
             speak_output = f"Ok, setting {PET_NAME}'s location to {location}"
         else:
-            speak_output = "Something has gone wrong"
+            speak_output = f"Something has gone wrong, unable to update {PET_NAME}'s location to {location}"
 
         return (
             handler_input.response_builder
