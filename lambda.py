@@ -35,6 +35,10 @@ HOUSEHOLD = ""
 API_URL = f"https://app.api.surehub.io/api/pet/{PET_ID}/position"
 
 def getCatLocation() -> str:
+    """Get cat location is invoked to get the location of the pet. it uses the url above
+        with the included pet id to the position endpoint. this returns some json with the location value.
+        1 is inside, 0 is outside."""
+
     location = ""
 
     LOGGER.debug("Making request to API URL %s", API_URL)
